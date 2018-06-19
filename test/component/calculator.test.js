@@ -19,4 +19,8 @@ describe('calculator', () => {
     it('should have header with class calculator and input', () => {
         expect(wrapper.findAll('div').at(3).classes()).toContain('input');
     })
+
+    it('should have buttons with class calculator and input-button', () => {
+        expect(wrapper.find('.calculator .input-button').exists()).toBeTruthy();
+    })
 })
