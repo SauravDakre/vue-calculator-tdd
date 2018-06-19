@@ -23,4 +23,19 @@ describe('calculator', () => {
     it('should have buttons with class calculator and input-button', () => {
         expect(wrapper.find('.calculator .input-button').exists()).toBeTruthy();
     })
+
+    it('should display appropriate result when addition operation is performed', () => {
+        const button3 = wrapper.find("[value='3']");
+        const button4 = wrapper.find("[value='5']");
+        const operator = wrapper.find("[value='+']");
+        const compute = wrapper.find("[value='=']");
+       
+        button3.trigger('click');
+        operator.trigger('click');
+        button4.trigger('click');
+        compute.trigger('click');
+
+        const result = wrapper.find('.result');
+        expect(result.text()).toBe('= 8');
+    })
 })
