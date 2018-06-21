@@ -24,33 +24,33 @@
         <div class="calculator input">
             <table>
                 <tr>
-                    <td><button value='C' @click="clearAll()" class="calcualator input-button">C</button></td>
-                    <td><button value='X' @click="clear()" class="calcualator input-button">X</button></td>
-                    <td><button value='/' @click="divide()" class="calcualator input-button">/</button></td>
-                    <td><button value='*' @click="multiply()" class="calcualator input-button">*</button></td>
+                    <td><button value='C' @click="clearAll()" class="input-button">C</button></td>
+                    <td><button value='X' @click="clear()" class="input-button">X</button></td>
+                    <td><button value='/' @click="handleDivide()" class="input-button">/</button></td>
+                    <td><button value='*' @click="handleMultiply()" class="input-button">*</button></td>
                 </tr>
                 <tr>
-                    <td><button value='7' @click="notify('7')" class="calcualator input-button">7</button></td>
-                    <td><button value='8' @click="notify('8')" class="calcualator input-button">8</button></td>
-                    <td><button value='9' @click="notify('9')" class="calcualator input-button">9</button></td>
-                    <td><button value='-' @click="substract('-')" class="calcualator input-button">-</button></td>
+                    <td><button value='7' @click="notify('7')" class="input-button">7</button></td>
+                    <td><button value='8' @click="notify('8')" class="input-button">8</button></td>
+                    <td><button value='9' @click="notify('9')" class="input-button">9</button></td>
+                    <td><button value='-' @click="hadleSubstract('-')" class="input-button">-</button></td>
                 </tr>
                 <tr>
-                    <td><button value='4' @click="notify('4')" class="calcualator input-button">4</button></td>
-                    <td><button value='5' @click="notify('5')" class="calcualator input-button">5</button></td>
-                    <td><button value='6' @click="notify('6')" class="calcualator input-button">6</button></td>
-                    <td><button value='+' @click="add('+')" class="calcualator input-button">+</button></td>
+                    <td><button value='4' @click="notify('4')" class="input-button">4</button></td>
+                    <td><button value='5' @click="notify('5')" class="input-button">5</button></td>
+                    <td><button value='6' @click="notify('6')" class="input-button">6</button></td>
+                    <td><button value='+' @click="handleAdd('+')" class="input-button">+</button></td>
                 </tr>
                 <tr>
-                    <td><button value='1' @click="notify('1')" class="calcualator input-button">1</button></td>
-                    <td><button value='2' @click="notify('2')" class="calcualator input-button">2</button></td>
-                    <td><button value='3' @click="notify('3')" class="calcualator input-button">3</button></td>
-                    <td rowspan=2 ><button value='=' @click="compute('=')" class="calcualator input-button equal">=</button></td>
+                    <td><button value='1' @click="notify('1')" class="input-button">1</button></td>
+                    <td><button value='2' @click="notify('2')" class="input-button">2</button></td>
+                    <td><button value='3' @click="notify('3')" class="input-button">3</button></td>
+                    <td rowspan=2 ><button value='=' @click="compute('=')" class="input-button equal">=</button></td>
                 </tr>
                 <tr>
-                    <td><button value='%' @click="modulus('%')" class="calcualator input-button">%</button></td>
-                    <td><button value='0' @click="notify('0')" class="calcualator input-button">0</button></td>
-                    <td><button value='.' @click="notify('.')" class="calcualator input-button">.</button></td>
+                    <td><button value='%' @click="handleModulus('%')" class="input-button">%</button></td>
+                    <td><button value='0' @click="notify('0')" class="input-button">0</button></td>
+                    <td><button value='.' @click="notify('.')" class="input-button">.</button></td>
                 </tr>
             </table>
         </div>
@@ -89,8 +89,7 @@ export default {
             if(this.focus){
                 this.operand1.show = true;
                 this.operand1.value += data;
-                this.operand2.show = false;
-                this.operand2.value = '';
+                this.hideOperand2();
             }else{
                 this.operand2.show = true;
                 this.operand2.value += data;
@@ -98,15 +97,11 @@ export default {
             }
         },
         clearAll: function(){
-            this.operand1.show = false;
-            this.operand1.value = '';
-            this.operand2.show = false;
-            this.operand2.value = '';
-            this.operator.show = false;
-            this.operator.value = '';
-            this.result.show = false;
-            this.result.value = '';
-            this.focus = true;
+            this.hideOperand1();
+            this.hideOperand2();
+            this.hideOperator();
+            this.hideResult();
+            this.foucsOnFirstOperand();
         },
         clear: function(){
             if(this.focus){
@@ -116,117 +111,92 @@ export default {
             }
             this.compute();
         },
-        divide: function(){
+        handleDivide: function(){
             if(this.operator.show !== '/' && this.operand1.show && this.operand2.show){
                 this.operatorChange();
             }
             if(this.operator.show && this.operand2.show){
-                this.operand1.value = Number(this.operand1.value) / Number(this.operand2.value);
-                this.operand2.show = false;
-                this.operand2.value = '';
+                this.operand1.value = this.divideNumbers();
+                this.hideOperand2();
             }
             if(!this.operand1.show){
-                this.operand1.value=0;
-                this.operand1.show = true;
+                this.showDefaultOperand1();
             }
-            this.focus = false;
-            this.operator.show = true;
-            this.operator.value = '/';
-            this.result.show = true;
-            this.result.value = this.operand1.value; 
+            this.foucsOnSecondOperand();
+            this.showOperator('/');
+            this.showResult(this.operand1.value);
         },
-        multiply: function(){
+        handleMultiply: function(){
             if(this.operator.show !== '*' && this.operand1.show && this.operand2.show){
                 this.operatorChange();
             }
             if(this.operator.show && this.operand2.show  ){
-                this.operand1.value = Number(this.operand1.value) * Number(this.operand2.value);
-                this.operand2.show = false;
-                this.operand2.value = '';
+                this.operand1.value = this.multiplyNumbers();
+                this.hideOperand2();
             }
             if(!this.operand1.show){
-                this.operand1.value=0;
-                this.operand1.show = true;
+                this.showDefaultOperand1();
             }
-            this.focus = false;
-            this.operator.show = true;
-            this.operator.value = '*';
-            this.result.show = true;
-            this.result.value = this.operand1.value; 
+            this.foucsOnSecondOperand();
+            this.showOperator('*');
+            this.showResult(this.operand1.value);
         },
-        substract: function(){
+        handleSubstract: function(){
             if(this.operator.show !== '-' && this.operand1.show && this.operand2.show){
                 this.operatorChange();
             }
             if(this.operator.show && this.operand2.show ){
-                this.operand1.value = Number(this.operand1.value) - Number(this.operand2.value);
-                this.operand2.show = false;
-                this.operand2.value = '';
+                this.operand1.value = this.substractNumbers();
+                this.hideOperand2();
             }
             if(!this.operand1.show){
-                this.operand1.value=0;
-                this.operand1.show = true;
+                this.showDefaultOperand1();
             }
-            this.focus = false;
-            this.operator.show = true;
-            this.operator.value = '-';
-            this.result.show = true;
-            this.result.value = this.operand1.value; 
+            this.foucsOnSecondOperand();
+            this.showOperator('-');
+            this.showResult(this.operand1.value);
         },
-        add: function(){
+        handleAdd: function(){
             if(this.operator.show !== '+' && this.operand1.show && this.operand2.show){
                 this.operatorChange();
             }
             if(this.operator.show && this.operand2.show){
-                this.operand1.value = Number(this.operand1.value) + Number(this.operand2.value);
-                this.operand2.show = false;
-                this.operand2.value = '';
+                this.operand1.value = this.addNumbers();
+                this.hideOperand2();
             }
             if(!this.operand1.show){
-                this.operand1.value=0;
-                this.operand1.show = true;
+                this.showDefaultOperand1();
             }
-            this.focus = false;
-            this.operator.show = true;
-            this.operator.value = '+';
-            this.result.show = true;
-            this.result.value = this.operand1.value; 
+            this.foucsOnSecondOperand();
+            this.showOperator('+');
+            this.showResult(this.operand1.value);
         },
-        modulus: function(){
+        handleModulus: function(){
             if(this.operator.show !== '%' && this.operand1.show && this.operand2.show){
                 this.operatorChange();
             }
             if(this.operator.show && this.operand2.show){
-                this.operand1.value = Number(this.operand1.value) % Number(this.operand2.value);
-                this.operand2.show = false;
-                this.operand2.value = '';
+                this.operand1.value = this.modulusNumbers();
+                this.hideOperand2();
             }
             if(!this.operand1.show){
-                this.operand1.value=0;
-                this.operand1.show = true;
+                this.showDefaultOperand1();
             }
-            this.focus = false;
-            this.operator.show = true;
-            this.operator.value = '%';
-            this.result.show = true;
-            this.result.value = this.operand1.value; 
+            this.foucsOnSecondOperand();
+            this.showOperator('%');
+            this.showResult(this.operand1.value);
         },
         compute: function(value){
             if(this.operator.value === '+'){
-                this.result.show = true;
-                this.result.value = Number(this.operand1.value) + Number(this.operand2.value);
+                this.showResult(this.addNumbers());
             }else if(this.operator.value === '-'){
-                this.result.show = true;
-                this.result.value = Number(this.operand1.value) - Number(this.operand2.value);
+                this.showResult(this.substractNumbers());
             }else if(this.operator.value === '*'){
-                this.result.show = true;
-                this.result.value = Number(this.operand1.value) * Number(this.operand2.value);
+                this.showResult(this.multiplyNumbers());
             }else if(this.operator.value === '/'){
-                this.result.show = true;
-                this.result.value = Number(this.operand1.value) / Number(this.operand2.value);
+                this.showResult(this.divideNumbers());
             }else if(this.operator.value === '%'){
-                this.result.show = true;
-                this.result.value = Number(this.operand1.value) % Number(this.operand2.value);
+                this.showResult(this.modulusNumbers());
             }
             if(value === '='){
                 this.computeCalled = true;
@@ -238,6 +208,55 @@ export default {
             this.operand2.show = false;
             this.result.value = '';
             this.result.show = false;
+        },
+        addNumbers: function(){
+            return Number(this.operand1.value) + Number(this.operand2.value);
+        },
+        substractNumbers: function(){
+            return Number(this.operand1.value) - Number(this.operand2.value);
+        },
+        multiplyNumbers: function(){
+            return Number(this.operand1.value) * Number(this.operand2.value);
+        },
+        divideNumbers: function(){
+            return Number(this.operand1.value) / Number(this.operand2.value);
+        },
+        modulusNumbers: function(){
+            return Number(this.operand1.value) % Number(this.operand2.value);
+        },
+        showDefaultOperand1: function(){
+            this.operand1.value=0;
+            this.operand1.show = true;
+        },
+        hideOperand2: function(){
+            this.operand2.show = false;
+            this.operand2.value = '';
+        },
+        hideOperand1: function(){
+            this.operand1.show = false;
+            this.operand1.value = '';
+        },
+        hideOperator: function(){
+            this.operator.show = false;
+            this.operator.value = '';
+        },
+        hideResult: function(){
+            this.result.show = false;
+            this.result.value = '';
+        },
+        showOperator: function(operator){
+            this.operator.show = true;
+            this.operator.value = operator;
+        },
+        showResult: function(result){
+            this.result.show = true;
+            this.result.value = result;
+        },
+        foucsOnSecondOperand(){
+            this.focus = false;
+        },
+        foucsOnFirstOperand(){
+            this.focus = true;
         }
     }
 };

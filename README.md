@@ -1,4 +1,4 @@
-# Vue Generic Template
+# Vue Calculator Application using TDD
 Developing calculator application using Test Driven Development Approach.
 
 ## Build Setup
